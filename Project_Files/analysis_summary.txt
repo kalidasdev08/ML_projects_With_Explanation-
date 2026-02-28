@@ -1,0 +1,26 @@
+--- India Rainfall Analysis Summary ---
+
+Data Range: 1901 - 2015
+Total Subdivisions: 36
+
+Average Annual Rainfall (All India): 1411.01 mm
+Highest Rainfall Year: 1961 (1717.10 mm)
+Lowest Rainfall Year: 1972 (1146.49 mm)
+
+--- Seasonal Averages ---
+Jan-Feb: 40.75 mm
+Mar-May: 155.90 mm
+Jun-Sep: 1064.72 mm
+Oct-Dec: 154.10 mm
+
+--- Top 3 Wettest Subdivisions ---
+DIVISION
+ARUNACHAL PRADESH    3418.857143
+COASTAL KARNATAKA    3408.409649
+KONKAN & GOA         2977.686087
+
+--- Top 3 Driest Subdivisions ---
+DIVISION
+WEST RAJASTHAN                292.673043
+SAURASHTRA & KUTCH            495.161739
+HARYANA DELHI & CHANDIGARH    530.496522

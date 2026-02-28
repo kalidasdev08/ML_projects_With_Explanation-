@@ -1,0 +1,210 @@
+{
+  "categories": {
+    "technical": {
+      "name": "Technical Questions",
+      "questions": [
+        {
+          "id": "tech_1",
+          "question": "Tell me about a technical project you worked on. What challenges did you face and how did you overcome them?",
+          "keywords": ["project", "challenge", "solution", "technical", "code", "development", "problem"],
+          "min_words": 30
+        },
+        {
+          "id": "tech_2",
+          "question": "Explain a complex technical concept to someone without a technical background.",
+          "keywords": ["explain", "concept", "technical", "simple", "understand", "analogy"],
+          "min_words": 25
+        },
+        {
+          "id": "tech_3",
+          "question": "How do you stay updated with the latest technology trends?",
+          "keywords": ["learning", "technology", "trends", "update", "courses", "blogs", "communities"],
+          "min_words": 20
+        },
+        {
+          "id": "tech_4",
+          "question": "Describe your experience with version control systems like Git.",
+          "keywords": ["git", "version", "control", "commit", "branch", "merge", "repository"],
+          "min_words": 20
+        },
+        {
+          "id": "tech_5",
+          "question": "How do you debug a problem in your code? Walk me through your process.",
+          "keywords": ["debug", "problem", "issue", "error", "test", "log", "identify", "fix"],
+          "min_words": 25
+        },
+        {
+          "id": "tech_6",
+          "question": "What programming languages are you most proficient in and why?",
+          "keywords": ["language", "programming", "proficient", "skill", "experience", "code"],
+          "min_words": 20
+        },
+        {
+          "id": "tech_7",
+          "question": "Explain the difference between SQL and NoSQL databases.",
+          "keywords": ["sql", "nosql", "database", "difference", "relational", "non-relational"],
+          "min_words": 25
+        },
+        {
+          "id": "tech_8",
+          "question": "How would you design a scalable system for handling high traffic?",
+          "keywords": ["scalable", "system", "traffic", "design", "architecture", "performance"],
+          "min_words": 30
+        }
+      ]
+    },
+    "behavioral": {
+      "name": "Behavioral Questions",
+      "questions": [
+        {
+          "id": "beh_1",
+          "question": "Tell me about a time when you had to work under tight deadlines.",
+          "keywords": ["deadline", "time", "pressure", "prioritize", "manage", "stress"],
+          "min_words": 25
+        },
+        {
+          "id": "beh_2",
+          "question": "Describe a situation where you had to work with a difficult team member.",
+          "keywords": ["team", "difficult", "conflict", "communication", "collaborate", "situation"],
+          "min_words": 25
+        },
+        {
+          "id": "beh_3",
+          "question": "Tell me about a time you failed. What did you learn from it?",
+          "keywords": ["failure", "learn", "mistake", "experience", "lesson", "failure"],
+          "min_words": 25
+        },
+        {
+          "id": "beh_4",
+          "question": "Describe a time when you took initiative on a project.",
+          "keywords": ["initiative", "project", "lead", "start", "proactive", "ownership"],
+          "min_words": 25
+        },
+        {
+          "id": "beh_5",
+          "question": "How do you handle constructive criticism?",
+          "keywords": ["criticism", "feedback", "accept", "improve", "response", "open"],
+          "min_words": 20
+        },
+        {
+          "id": "beh_6",
+          "question": "Tell me about a time you had to adapt to unexpected changes.",
+          "keywords": ["adapt", "change", "flexible", "adjust", "unexpected", "situation"],
+          "min_words": 25
+        },
+        {
+          "id": "beh_7",
+          "question": "Describe your ideal work environment.",
+          "keywords": ["environment", "ideal", "work", "culture", "preference", "team"],
+          "min_words": 20
+        },
+        {
+          "id": "beh_8",
+          "question": "How do you prioritize your tasks when everything seems urgent?",
+          "keywords": ["prioritize", "urgent", "tasks", "important", "organization", "time management"],
+          "min_words": 20
+        }
+      ]
+    },
+    "situational": {
+      "name": "Situational Questions",
+      "questions": [
+        {
+          "id": "sit_1",
+          "question": "If you were assigned a project with unrealistic deadlines, what would you do?",
+          "keywords": ["unrealistic", "deadline", "project", "communicate", "negotiate", "plan"],
+          "min_words": 25
+        },
+        {
+          "id": "sit_2",
+          "question": "How would you handle a disagreement with your manager?",
+          "keywords": ["disagreement", "manager", "conflict", "communication", "resolve", "professional"],
+          "min_words": 25
+        },
+        {
+          "id": "sit_3",
+          "question": "If you noticed a colleague making a mistake that could affect the project, what would you do?",
+          "keywords": ["mistake", "colleague", "project", "help", "communicate", "responsible"],
+          "min_words": 25
+        },
+        {
+          "id": "sit_4",
+          "question": "How would you manage working on multiple projects simultaneously?",
+          "keywords": ["multiple", "projects", "manage", "prioritize", "organization", "time"],
+          "min_words": 20
+        },
+        {
+          "id": "sit_5",
+          "question": "What would you do if you didn't understand a requirement from a client?",
+          "keywords": ["understand", "requirement", "client", "clarify", "question", "communication"],
+          "min_words": 20
+        },
+        {
+          "id": "sit_6",
+          "question": "How would you approach learning a new technology quickly?",
+          "keywords": ["learn", "new", "technology", "quickly", "approach", "resources", "practice"],
+          "min_words": 20
+        }
+      ]
+    },
+    "general": {
+      "name": "General Questions",
+      "questions": [
+        {
+          "id": "gen_1",
+          "question": "Tell me about yourself.",
+          "keywords": ["background", "experience", "skills", "career", "professional", "education"],
+          "min_words": 30
+        },
+        {
+          "id": "gen_2",
+          "question": "What are your strengths and weaknesses?",
+          "keywords": ["strengths", "weaknesses", "skills", "improve", "development", "honest"],
+          "min_words": 30
+        },
+        {
+          "id": "gen_3",
+          "question": "Why do you want to work for this company?",
+          "keywords": ["company", "want", "reason", "interest", "values", "culture", "opportunity"],
+          "min_words": 25
+        },
+        {
+          "id": "gen_4",
+          "question": "Where do you see yourself in 5 years?",
+          "keywords": ["future", "career", "goals", "years", "aspiration", "growth"],
+          "min_words": 25
+        },
+        {
+          "id": "gen_5",
+          "question": "What are your salary expectations?",
+          "keywords": ["salary", "expectations", "compensation", "market", "value", "negotiate"],
+          "min_words": 15
+        },
+        {
+          "id": "gen_6",
+          "question": "Do you have any questions for me?",
+          "keywords": ["questions", "company", "team", "role", "culture", "curious"],
+          "min_words": 10
+        }
+      ]
+    }
+  },
+  "evaluation_criteria": {
+    "clarity": {
+      "weight": 0.25,
+      "description": "How clearly the answer is communicated"
+    },
+    "relevance": {
+      "weight": 0.30,
+      "description": "How relevant the answer is to the question"
+    },
+    "depth": {
+      "weight": 0.25,
+      "description": "Level of detail and depth in the answer"
+    },
+    "specificity": {
+      "weight": 0.20,
+      "description": "Use of specific examples and concrete details"
+    }
+  }
+}

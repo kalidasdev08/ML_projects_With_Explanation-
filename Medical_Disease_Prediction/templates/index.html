@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Disease Prediction - AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-height: 300px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 10px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.bot {
+            background: #e8eaf6;
+            color: #333;
+            margin-right: auto;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message .sender {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            opacity: 0.8;
+        }
+        
+        .message .text {
+            line-height: 1.5;
+        }
+        
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input input:focus {
+            border-color: #667eea;
+        }
+        
+        .chat-input button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .chat-input button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .chat-input button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Symptom Selection */
+        .symptom-categories {
+            margin-bottom: 15px;
+        }
+        
+        .category-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .category-tab {
+            padding: 6px 12px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .category-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .symptom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .symptom-checkbox:hover {
+            background: #e8eaf6;
+        }
+        
+        .symptom-checkbox input {
+            accent-color: #667eea;
+        }
+        
+        .symptom-checkbox label {
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        /* Prediction Result */
+        .prediction-result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .prediction-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .prediction-result h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .prediction-item.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .disease-name {
+            font-weight: 600;
+        }
+        
+        .confidence {
+            padding: 3px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+        
+        /* Disclaimer */
+        .disclaimer {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            color: #856404;
+        }
+        
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error Message */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Medical Disease Prediction</h1>
+            <p>AI-Powered Symptom Analysis & Disease Prediction</p>
+        </div>
+        
+        <div class="main-content">
+            <!-- Chat Interface -->
+            <div class="card">
+                <div class="card-header">
+                    💬 AI Health Assistant
+                </div>
+                <div class="card-body">
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="sender">Health Assistant</div>
+                                <div class="text">
+                                    Hello! I'm your Medical Disease Prediction Assistant. 
+                                    I can help you identify potential diseases based on your symptoms.
+                                    <br><br>
+                                    You can describe your symptoms in natural language, for example:
+                                    <br>• "I have fever and cough"
+                                    <br>• "I'm experiencing headache and fatigue"
+                                    <br><br>
+                                    Or select symptoms from the panel and click "Analyze Symptoms".
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="chatInput" placeholder="Describe your symptoms..." autocomplete="off">
+                            <button id="sendBtn" onclick="sendMessage()">Send</button>
+                        </div>
+                        <div class="error-message" id="errorMessage"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Symptom Selection -->
+            <div class="card">
+                <div class="card-header">
+                    🔍 Select Your Symptoms
+                </div>
+                <div class="card-body">
+                    <div class="symptom-categories">
+                        <div class="category-tabs">
+                            <button class="category-tab active" onclick="filterSymptoms('all')">All</button>
+                            <button class="category-tab" onclick="filterSymptoms('common')">Common</button>
+                            <button class="category-tab" onclick="filterSymptoms('respiratory')">Respiratory</button>
+                            <button class="category-tab" onclick="filterSymptoms('digestive')">Digestive</button>
+                            <button class="category-tab" onclick="filterSymptoms('pain')">Pain</button>
+                            <button class="category-tab" onclick="filterSymptoms('skin')">Skin</button>
+                        </div>
+                        <div class="symptoms-grid" id="symptomsGrid">
+                            <!-- Symptoms will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-btn" onclick="clearSymptoms()">Clear All</button>
+                        <button class="quick-btn" onclick="showCommonSymptoms()">Common Symptoms</button>
+                        <button class="quick-btn" onclick="analyzeSelected()">Analyze Symptoms</button>
+                    </div>
+                    
+                    <div class="prediction-result" id="predictionResult">
+                        <h3>📋 Prediction Results</h3>
+                        <div id="predictionContent"></div>
+                    </div>
+                    
+                    <div class="disclaimer">
+                        <strong>⚠️ Disclaimer:</strong> This is an AI-powered preliminary assessment tool. 
+                        The predictions are based on machine learning algorithms and should NOT be used as 
+                        a substitute for professional medical advice, diagnosis, or treatment. 
+                        Always consult a qualified healthcare provider for proper medical care.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Symptom categories
+        const symptomCategories = {
+            common: ['fever', 'cough', 'headache', 'fatigue', 'body_ache'],
+            respiratory: ['cough', 'shortness_of_breath', 'sore_throat', 'runny_nose', 'chest_pain'],
+            digestive: ['nausea', 'vomiting', 'diarrhea', 'abdominal_pain'],
+            pain: ['headache', 'body_ache', 'chest_pain', 'abdominal_pain', 'joint_pain', 'ear_pain'],
+            skin: ['rash', 'skin_lesion']
+        };
+        
+        let allSymptoms = [];
+        let selectedSymptoms = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSymptoms();
+            
+            // Enter key to send message
+            document.getElementById('chatInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+        
+        // Load symptoms from server
+        async function loadSymptoms() {
+            try {
+                const response = await fetch('/symptoms');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allSymptoms = data.symptoms;
+                    renderSymptoms(allSymptoms);
+                }
+            } catch (error) {
+                console.error('Error loading symptoms:', error);
+                showError('Failed to load symptoms. Please refresh the page.');
+            }
+        }
+        
+        // Render symptoms grid
+        function renderSymptoms(symptoms) {
+            const grid = document.getElementById('symptomsGrid');
+            grid.innerHTML = '';
+            
+            symptoms.forEach(symptom => {
+                const div = document.createElement('div');
+                div.className = 'symptom-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" id="symptom_${symptom}" value="${symptom}" 
+                           ${selectedSymptoms.includes(symptom) ? 'checked' : ''}
+                           onchange="toggleSymptom('${symptom}')">
+                    <label for="symptom_${symptom}">${formatSymptom(symptom)}</label>
+                `;
+                grid.appendChild(div);
+            });
+        }
+        
+        // Filter symptoms by category
+        function filterSymptoms(category) {
+            // Update active tab
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            if (category === 'all') {
+                renderSymptoms(allSymptoms);
+            } else {
+                const filtered = allSymptoms.filter(s => 
+                    symptomCategories[category].includes(s)
+                );
+                renderSymptoms(filtered);
+            }
+        }
+        
+        // Toggle symptom selection
+        function toggleSymptom(symptom) {
+            const index = selectedSymptoms.indexOf(symptom);
+            if (index > -1) {
+                selectedSymptoms.splice(index, 1);
+            } else {
+                selectedSymptoms.push(symptom);
+            }
+        }
+        
+        // Show common symptoms
+        function showCommonSymptoms() {
+            selectedSymptoms = ['fever', 'cough', 'fatigue', 'headache', 'body_ache'];
+            renderSymptoms(allSymptoms);
+        }
+        
+        // Clear all symptoms
+        function clearSymptoms() {
+            selectedSymptoms = [];
+            renderSymptoms(allSymptoms);
+        }
+        
+        // Format symptom name
+        function formatSymptom(symptom) {
+            return symptom.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // Send chat message
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show loading
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span>...';
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage(data.response, 'bot');
+                    
+                    // Extract and display prediction if available
+                    if (data.response.includes('Primary Prediction')) {
+                        showPredictionFromResponse(data.response);
+                    }
+                } else {
+                    showError(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Failed to send message. Please try again.');
+            }
+            
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Send';
+        }
+        
+        // Add message to chat
+        function addMessage(text, sender) {
+            const messages = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            // Convert markdown-like formatting to HTML
+            let formattedText = text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+            
+            div.innerHTML = `
+                <div class="sender">${sender === 'user' ? 'You' : 'Health Assistant'}</div>
+                <div class="text">${formattedText}</div>
+            `;
+            
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        // Analyze selected symptoms
+        async function analyzeSelected() {
+            if (selectedSymptoms.length === 0) {
+                showError('Please select at least one symptom.');
+                return;
+            }
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="loading"></span>...';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symptoms: selectedSymptoms })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPrediction(data.prediction);
+                    addMessage(data.response, 'bot');
+                } else {
+                    showError(data.error || 'An error occurred');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Failed to analyze symptoms. Please try again.');
+            }
+            
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = 'Send';
+        }
+        
+        // Display prediction results
+        function displayPrediction(prediction) {
+            const resultDiv = document.getElementById('predictionResult');
+            const contentDiv = document.getElementById('predictionContent');
+            
+            let html = '';
+            
+            // Primary prediction
+            if (prediction.top_predictions && prediction.top_predictions.length > 0) {
+                prediction.top_predictions.forEach((pred, index) => {
+                    const isPrimary = index === 0;
+                    html += `
+                        <div class="prediction-item ${isPrimary ? 'primary' : ''}">
+                            <span class="disease-name">${pred.disease}</span>
+                            <span class="confidence">${pred.probability}%</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            contentDiv.innerHTML = html;
+            resultDiv.classList.add('show');
+        }
+        
+        // Show prediction from response text
+        function showPredictionFromResponse(response) {
+            // Extract disease and probability from response
+            const lines = response.split('\n');
+            let predictions = [];
+            let currentDisease = '';
+            let currentProb = '';
+            
+            lines.forEach(line => {
+                if (line.includes('Primary Prediction:')) {
+                    currentDisease = line.split(':')[1].trim();
+                }
+                if (line.includes('Confidence:')) {
+                    currentProb = line.split(':')[1].trim().replace('%', '');
+                }
+            });
+            
+            // Show in result panel
+            if (currentDisease) {
+                const resultDiv = document.getElementById('predictionResult');
+                const contentDiv = document.getElementById('predictionContent');
+                
+                contentDiv.innerHTML = `
+                    <div class="prediction-item primary">
+                        <span class="disease-name">${currentDisease}</span>
+                        <span class="confidence">${currentProb}%</span>
+                    </div>
+                `;
+                
+                resultDiv.classList.add('show');
+            }
+        }
+        
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            color: #667eea;
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .feature-item {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .feature-item strong {
+            color: #555;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .sample-predictions {
+            margin-top: 20px;
+        }
+
+        .sample-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sample-info {
+            color: #555;
+        }
+
+        .sample-price {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .info-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .amenity-levels {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .amenity-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 House Price Predictor</h1>
+            <p>Predict house prices using Machine Learning</p>
+        </div>
+
+        <div class="card">
+            <h2>Enter House Details</h2>
+            <form id="predictionForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="location">📍 Location</label>
+                        <select id="location" name="location" required>
+                            <option value="">Select Location</option>
+                            <option value="Urban">Urban</option>
+                            <option value="Suburban">Suburban</option>
+                            <option value="Rural">Rural</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="size_sqft">📐 Size (sq ft)</label>
+                        <input type="number" id="size_sqft" name="size_sqft" 
+                               placeholder="e.g., 1800" min="500" max="10000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bedrooms">🛏️ Bedrooms</label>
+                        <input type="number" id="bedrooms" name="bedrooms" 
+                               placeholder="e.g., 3" min="1" max="20" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age_years">📅 Age (years)</label>
+                        <input type="number" id="age_years" name="age_years" 
+                               placeholder="e.g., 5" min="0" max="100" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="amenities">⭐ Amenities Level (0-5)</label>
+                        <input type="number" id="amenities" name="amenities" 
+                               placeholder="e.g., 3" min="0" max="5" required>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h4>Amenity Level Guide:</h4>
+                    <div class="amenity-levels">
+                        <span class="amenity-badge">0 - Basic</span>
+                        <span class="amenity-badge">1 - Standard</span>
+                        <span class="amenity-badge">2 - Good</span>
+                        <span class="amenity-badge">3 - Better</span>
+                        <span class="amenity-badge">4 - Best</span>
+                        <span class="amenity-badge">5 - Premium</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="predictBtn">Predict Price</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Making prediction...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="result" id="result">
+                <h3 id="predictedPrice">$0</h3>
+                <p>Estimated House Price (USD / INR)</p>
+                <div class="features-list" id="featuresList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Handle form submission
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Hide previous results and errors
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+            
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('predictBtn').disabled = true;
+            
+            // Get form data
+            const formData = {
+                location: document.getElementById('location').value,
+                size_sqft: parseFloat(document.getElementById('size_sqft').value),
+                bedrooms: parseInt(document.getElementById('bedrooms').value),
+                age_years: parseInt(document.getElementById('age_years').value),
+                amenities: parseInt(document.getElementById('amenities').value)
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('predictBtn').disabled = false;
+                
+                if (data.success) {
+                    // Show result
+                    document.getElementById('predictedPrice').innerHTML = 
+                        data.prediction.formatted_price + 
+                        '<br><span style="font-size:1.2rem">' + 
+                        data.prediction.formatted_price_inr + '</span>';
+                    
+                    // Show input features
+                    const featuresList = document.getElementById('featuresList');
+                    featuresList.innerHTML = `
+                        <div class="feature-item"><strong>Location:</strong> ${data.input.location}</div>
+                        <div class="feature-item"><strong>Size:</strong> ${data.input.size_sqft} sqft</div>
+                        <div class="feature-item"><strong>Bedrooms:</strong> ${data.input.bedrooms}</div>
+                        <div class="feature-item"><strong>Age:</strong> ${data.input.age_years} years</div>
+                        <div class="feature-item"><strong>Amenities:</strong> ${data.input.amenities}</div>
+                    `;
+                    
+                    document.getElementById('result').classList.add('show');
+                } else {
+                    // Show error
+                    document.getElementById('error').textContent = data.error;
+                    document.getElementById('error').classList.add('show');
+                }
+            } catch (error) {
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('predictBtn').disabled = false;
+                
+                // Show error
+                document.getElementById('error').textContent = 'An error occurred. Please try again.';
+                document.getElementById('error').classList.add('show');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance Advisor AI 💰</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        :root {
+            --primary: #6366F1;
+            --primary-dark: #4F46E5;
+            --secondary: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #6B7280;
+            font-size: 1.1rem;
+        }
+
+        .ai-badge {
+            display: inline-block;
+            background: var(--gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--dark);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .expense-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .expense-item {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .expense-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .expense-item label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .expense-item input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .expense-item input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Button */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 25px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+        }
+
+        .stat-card.purple {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Categories */
+        .category-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--light);
+            border-radius: 12px;
+            gap: 15px;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+        }
+
+        .category-info {
+            flex: 1;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .category-amount {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+
+        .category-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .category-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            background: var(--primary);
+        }
+
+        /* Color modifiers for categories */
+        .cat-red { background: #FF6B6B; }
+        .cat-teal { background: #4ECDC4; }
+        .cat-blue { background: #45B7D1; }
+        .cat-green { background: #96CEB4; }
+        .cat-yellow { background: #FFEAA7; }
+        .cat-purple { background: #DDA0DD; }
+        .cat-mint { background: #98D8C8; }
+        .cat-indigo { background: #70A1FF; }
+        .cat-gray { background: #A8A8A8; }
+
+        /* Category-specific colors */
+        .category-item[data-cat="Housing"] .category-icon { background: rgba(255, 107, 107, 0.2); }
+        .category-item[data-cat="Housing"] .category-fill { background: #FF6B6B; }
+        .category-item[data-cat="Food"] .category-icon { background: rgba(78, 205, 196, 0.2); }
+        .category-item[data-cat="Food"] .category-fill { background: #4ECDC4; }
+        .category-item[data-cat="Transportation"] .category-icon { background: rgba(69, 183, 209, 0.2); }
+        .category-item[data-cat="Transportation"] .category-fill { background: #45B7D1; }
+        .category-item[data-cat="Utilities"] .category-icon { background: rgba(150, 206, 180, 0.2); }
+        .category-item[data-cat="Utilities"] .category-fill { background: #96CEB4; }
+        .category-item[data-cat="Entertainment"] .category-icon { background: rgba(255, 234, 167, 0.2); }
+        .category-item[data-cat="Entertainment"] .category-fill { background: #FFEAA7; }
+        .category-item[data-cat="Shopping"] .category-icon { background: rgba(221, 160, 221, 0.2); }
+        .category-item[data-cat="Shopping"] .category-fill { background: #DDA0DD; }
+        .category-item[data-cat="Healthcare"] .category-icon { background: rgba(152, 216, 200, 0.2); }
+        .category-item[data-cat="Healthcare"] .category-fill { background: #98D8C8; }
+        .category-item[data-cat="Savings"] .category-icon { background: rgba(112, 161, 255, 0.2); }
+        .category-item[data-cat="Savings"] .category-fill { background: #70A1FF; }
+        .category-item[data-cat="Other"] .category-icon { background: rgba(168, 168, 168, 0.2); }
+        .category-item[data-cat="Other"] .category-fill { background: #A8A8A8; }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-good {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-high {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .status-low {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        /* Recommendations */
+        .recommendation-item {
+            display: flex;
+            gap: 15px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .recommendation-item.urgent {
+            border-left-color: var(--danger);
+            background: #FEF2F2;
+        }
+
+        .recommendation-item.warning {
+            border-left-color: var(--warning);
+            background: #FFFBEB;
+        }
+
+        .recommendation-item.success {
+            border-left-color: var(--secondary);
+            background: #ECFDF5;
+        }
+
+        .recommendation-item.tip {
+            border-left-color: var(--primary);
+            background: #EEF2FF;
+        }
+
+        .recommendation-item.info {
+            border-left-color: #8B5CF6;
+            background: #F5F3FF;
+        }
+
+        .rec-icon {
+            font-size: 1.5rem;
+        }
+
+        .rec-content h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .rec-content p {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        /* Savings Plan */
+        .plan-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--light);
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content h4 {
+            color: var(--dark);
+            margin-bottom: 3px;
+        }
+
+        .step-content p {
+            color: #6B7280;
+            font-size: 0.9rem;
+        }
+
+        .step-amount {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="ai-badge">🤖 AI-Powered</div>
+            <h1>Personal Finance Advisor</h1>
+            <p>Analyze your spending patterns and get personalized savings recommendations</p>
+        </div>
+
+        <!-- Input Form -->
+        <div class="card">
+            <h2 class="card-title">💵 Enter Your Financial Details</h2>
+            <form action="/analyze" method="POST">
+                <div class="form-group">
+                    <label>Monthly Income</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">💰</span>
+                        <input type="number" name="income" class="form-control" placeholder="Enter your monthly income" value="{{ income if income else '' }}" required>
+                    </div>
+                </div>
+
+                <h3 style="margin: 30px 0 20px; color: var(--dark);">Monthly Expenses by Category</h3>
+                
+                <div class="expense-grid">
+                    {% for cat, data in categories.items() %}
+                    <div class="expense-item">
+                        <label>
+                            <span>{{ data.icon }}</span>
+                            <span>{{ cat }}</span>
+                        </label>
+                        <input type="number" name="expense_{{ cat }}" placeholder="0" value="{{ expenses[cat] if expenses and expenses[cat] else '' }}">
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span>🔍</span>
+                    Analyze My Finances
+                </button>
+            </form>
+        </div>
+
+        {% if analysis %}
+        <!-- Results Section -->
+        <div class="results-grid">
+            <!-- Summary Stats -->
+            <div class="card">
+                <h2 class="card-title">📊 Financial Summary</h2>
+                <div class="results-grid" style="margin-top: 0;">
+                    <div class="stat-card">
+                        <div class="stat-label">Monthly Income</div>
+                        <div class="stat-value">${{ "%.2f"|format(analysis.income) }}</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-label">Savings</div>
+                        <div class="stat-value">${{ "%.2f"|format(analysis.savings) }}</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-label">Savings Rate</div>
+                        <div class="stat-value">{{ "%.1f"|format(analysis.savings_rate) }}%</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-label">Total Expenses</div>
+                        <div class="stat-value">${{ "%.2f"|format(analysis.total_expenses) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div class="card">
+                <h2 class="card-title">📈 Spending Breakdown</h2>
+                <div class="category-list">
+                    {% for cat in analysis.categories %}
+                    <div class="category-item" data-cat="{{ cat.name }}">
+                        <div class="category-icon">
+                            {{ cat.icon }}
+                        </div>
+                        <div class="category-info">
+                            <div class="category-name">{{ cat.name }}</div>
+                            <div class="category-amount">
+                                ${{ "%.2f"|format(cat.amount) }} ({{ "%.1f"|format(cat.percentage) }}% of income)
+                            </div>
+                            <div class="category-bar">
+                                <div class="category-fill" data-width="{{ width|string }}"></div>
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ cat.status }}">
+                            {% if cat.status == 'good' %}✓ Optimal
+                            {% elif cat.status == 'high' %}↑ High
+                            {% else %}↓ Low{% endif %}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+            <h2 class="card-title">💡 AI Recommendations</h2>
+            {% for rec in analysis.recommendations %}
+            <div class="recommendation-item {{ rec.type }}">
+                <div class="rec-icon">{{ rec.icon }}</div>
+                <div class="rec-content">
+                    <h4>{{ rec.title }}</h4>
+                    <p>{{ rec.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Savings Plan -->
+        {% if savings_plan %}
+        <div class="card">
+            <h2 class="card-title">🎯 Personalized Savings Plan</h2>
+            
+            {% if savings_plan.status == 'exceeds' %}
+                <div class="recommendation-item success">
+                    <div class="rec-icon">🎉</div>
+                    <div class="rec-content">
+                        <h4>Goal Exceeded!</h4>
+                        <p>{{ savings_plan.message }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="results-grid" style="margin-top: 0;">
+                    <div class="stat-card green">
+                        <div class="stat-label">Target Monthly Savings</div>
+                        <div class="stat-value">${{ "%.2f"|format(savings_plan.target_savings) }}</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-label">Current Savings</div>
+                        <div class="stat-value">${{ "%.2f"|format(savings_plan.current_savings) }}</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-label">Shortfall</div>
+                        <div class="stat-value">${{ "%.2f"|format(savings_plan.shortfall) }}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Yearly Potential</div>
+                        <div class="stat-value">${{ "%.2f"|format(savings_plan.yearly_potential) }}</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 30px 0 20px; color: var(--dark);">Action Plan to Reach Your Goal</h3>
+                
+                {% for step in savings_plan.monthly_steps %}
+                <div class="plan-step">
+                    <div class="step-number">{{ loop.index }}</div>
+                    <div class="step-content">
+                        <h4>{{ step.action }}</h4>
+                        <p>From ${{ "%.2f"|format(step.from) }} → ${{ "%.2f"|format(step.to) }}</p>
+                    </div>
+                    <div class="step-amount">${{ "%.2f"|format(step.amount) }}</div>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Potential Savings -->
+        {% if analysis.potential_savings.total > 0 %}
+        <div class="card">
+            <h2 class="card-title">💰 Potential Monthly Savings</h2>
+            <div class="stat-card green" style="max-width: 300px; margin: 0 auto 20px;">
+                <div class="stat-label">You Could Save</div>
+                <div class="stat-value">${{ "%.2f"|format(analysis.potential_savings.total) }}</div>
+                <div class="stat-label">per month with optimization</div>
+            </div>
+            
+            {% for tip in analysis.potential_savings.tips %}
+            <div class="plan-step">
+                <div class="step-icon">{{ tip.icon }}</div>
+                <div class="step-content">
+                    <h4>{{ tip.tip }}</h4>
+                </div>
+                <div class="step-amount">+${{ "%.2f"|format(tip.potential) }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endif %}
+
+        {% if error %}
+        <div class="card" style="border-left: 4px solid var(--danger);">
+            <h2 class="card-title" style="color: var(--danger);">⚠️ Error</h2>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Set category bar widths from data attributes
+        document.querySelectorAll('.category-fill[data-width]').forEach(function(el) {
+            el.style.width = el.getAttribute('data-width') + '%';
+        });
+    </script>
+</body>
+</html>

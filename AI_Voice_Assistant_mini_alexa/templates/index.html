@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Alexa - Voice Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .logo svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .mic-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+        
+        .mic-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+        
+        .mic-button:active {
+            transform: scale(0.95);
+        }
+        
+        .mic-button.listening {
+            animation: pulse 1.5s infinite;
+            background: #ff4757;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 71, 87, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+        }
+        
+        .mic-button svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+        
+        .status {
+            margin-top: 20px;
+            color: #666;
+            font-size: 16px;
+            min-height: 24px;
+        }
+        
+        .input-container {
+            margin-top: 30px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            border-color: #667eea;
+        }
+        
+        .send-button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .response-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            text-align: left;
+            min-height: 100px;
+            display: none;
+        }
+        
+        .response-container.show {
+            display: block;
+        }
+        
+        .response-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .response-text {
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .commands {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            text-align: left;
+        }
+        
+        .commands h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .commands ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        
+        .commands li {
+            color: #666;
+            font-size: 13px;
+            padding: 5px 10px;
+            background: white;
+            border-radius: 5px;
+        }
+        
+        .loading {
+            display: none;
+            margin-top: 10px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93c-3.94-.49-7-3.85-7-7.93h2c0 3.31 2.69 6 6 6s6-2.69 6-6h2c0 4.08-3.06 7.44-7 7.93V19h4v2H8v-2h4v-3.07z"/>
+            </svg>
+        </div>
+        
+        <h1>Mini Alexa</h1>
+        <p class="subtitle">Your Voice Assistant</p>
+        
+        <button class="mic-button" id="micButton" title="Click to speak">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1 1.93c-3.94-.49-7-3.85-7-7.93h2c0 3.31 2.69 6 6 6s6-2.69 6-6h2c0 4.08-3.06 7.44-7 7.93V19h4v2H8v-2h4v-3.07z"/>
+            </svg>
+        </button>
+        
+        <p class="status" id="status">Click the microphone to start</p>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="commandInput" placeholder="Type a command...">
+            <button class="send-button" id="sendButton">Send</button>
+        </div>
+        
+        <div class="response-container" id="responseContainer">
+            <p class="response-label">Assistant Response</p>
+            <p class="response-text" id="responseText"></p>
+        </div>
+        
+        <div class="commands">
+            <h3>Try these commands:</h3>
+            <ul>
+                <li>"What time is it?"</li>
+                <li>"What day is it today?"</li>
+                <li>"Search for Python"</li>
+                <li>"Open YouTube"</li>
+                <li>"Open Notepad"</li>
+                <li>"Play music"</li>
+                <li>"Who is Elon Musk?"</li>
+                <li>"Tell me a joke"</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const micButton = document.getElementById('micButton');
+        const status = document.getElementById('status');
+        const commandInput = document.getElementById('commandInput');
+        const sendButton = document.getElementById('sendButton');
+        const responseContainer = document.getElementById('responseContainer');
+        const responseText = document.getElementById('responseText');
+        const loading = document.getElementById('loading');
+        
+        let isListening = false;
+        
+        // Click on microphone button
+        micButton.addEventListener('click', async () => {
+            if (isListening) return;
+            
+            try {
+                status.textContent = 'Listening...';
+                micButton.classList.add('listening');
+                isListening = true;
+                
+                const response = await fetch('/listen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    commandInput.value = data.command;
+                    processCommand(data.command);
+                } else {
+                    status.textContent = data.error || 'Could not understand. Try again.';
+                }
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+            } finally {
+                micButton.classList.remove('listening');
+                isListening = false;
+            }
+        });
+        
+        // Send button click
+        sendButton.addEventListener('click', () => {
+            const command = commandInput.value.trim();
+            if (command) {
+                processCommand(command);
+            }
+        });
+        
+        // Enter key press.addEventListener('
+        commandInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                if (command) {
+                    processCommand(command);
+                }
+            }
+        });
+        
+        // Process command
+        async function processCommand(command) {
+            responseContainer.classList.remove('show');
+            loading.classList.add('show');
+            status.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('/process_command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: command })
+                });
+                
+                const data = await response.json();
+                
+                responseText.textContent = data.response;
+                responseContainer.classList.add('show');
+                status.textContent = 'Ready';
+                
+                // Make assistant speak the response
+                speakResponse(data.response);
+                
+                // Clear input
+                commandInput.value = '';
+                
+                // Check if exit
+                if (data.action === 'exit') {
+                    status.textContent = 'Goodbye!';
+                }
+            } catch (error) {
+                status.textContent = 'Error: ' + error.message;
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+        
+        // Make assistant speak
+        async function speakResponse(text) {
+            try {
+                await fetch('/speak', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
+                });
+            } catch (error) {
+                console.log('Speech error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "model_type": "MobileNetV2 Transfer Learning",
+  "input_shape": [
+    224,
+    224,
+    3
+  ],
+  "num_classes": 120,
+  "epochs_trained": 40,
+  "batch_size": 32,
+  "accuracy": "Use real dataset for accurate training"
+}

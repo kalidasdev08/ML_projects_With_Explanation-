@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Churn Prediction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --bg-color: #ecf0f1;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), #1a252f);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card-header {
+            background: white;
+            border-bottom: 2px solid var(--secondary-color);
+            font-weight: 600;
+            color: var(--primary-color);
+            padding: 1rem 1.5rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+        
+        .form-control, .form-select {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 0.6rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #2980b9);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .result-card {
+            display: none;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .result-card.high-risk {
+            border-left-color: var(--accent-color);
+            background: #fff5f5;
+        }
+        
+        .result-card.medium-risk {
+            border-left-color: var(--warning-color);
+            background: #fffbf0;
+        }
+        
+        .result-card.low-risk {
+            border-left-color: var(--success-color);
+            background: #f0fff4;
+        }
+        
+        .churn-badge {
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+        
+        .churn-badge.high {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .churn-badge.medium {
+            background-color: var(--warning-color);
+            color: white;
+        }
+        
+        .churn-badge.low {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .probability-bar {
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #e9ecef;
+            position: relative;
+        }
+        
+        .probability-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+        
+        .feature-importance-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .feature-item {
+            padding: 0.5rem;
+            margin: 0.3rem 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        
+        .feature-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .feature-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.3);
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .feature-bar-fill {
+            height: 100%;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--primary-color);
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+        }
+        
+        .nav-tabs .nav-link.active {
+            border-bottom: 3px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .info-icon {
+            color: var(--secondary-color);
+            cursor: pointer;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-user-minus me-2"></i>
+                Customer Churn Prediction
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showFeatureImportance()">
+                            <i class="fas fa-chart-bar me-1"></i> Feature Importance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showModelInfo()">
+                            <i class="fas fa-info-circle me-1"></i> Model Info
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Customer Information
+                    </div>
+                    <div class="card-body">
+                        <form id="predictionForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">City Tier</label>
+                                    <select class="form-select" id="city_tier" required>
+                                        <option value="">Select City Tier</option>
+                                        <option value="Tier1">Tier 1</option>
+                                        <option value="Tier2">Tier 2</option>
+                                        <option value="Tier3">Tier 3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Subscription Type</label>
+                                    <select class="form-select" id="subscription_type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="Basic">Basic</option>
+                                        <option value="Premium">Premium</option>
+                                        <option value="Enterprise">Enterprise</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Contract Length</label>
+                                    <select class="form-select" id="contract_length" required>
+                                        <option value="">Select Length</option>
+                                        <option value="Monthly">Monthly</option>
+                                        <option value="Quarterly">Quarterly</option>
+                                        <option value="Annual">Annual</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Age</label>
+                                    <input type="number" class="form-control" id="age" min="18" max="70" placeholder="Enter age" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tenure (Months)</label>
+                                    <input type="number" class="form-control" id="tenure_months" min="1" max="60" placeholder="Months with us" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Monthly Charge ($)</label>
+                                    <input type="number" class="form-control" id="monthly_charge" min="0" step="0.01" placeholder="Monthly subscription cost" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Total Charges ($)</label>
+                                    <input type="number" class="form-control" id="total_charges" min="0" step="0.01" placeholder="Total amount paid" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Payment Method</label>
+                                    <select class="form-select" id="payment_method" required>
+                                        <option value="">Select Method</option>
+                                        <option value="Credit Card">Credit Card</option>
+                                        <option value="Debit Card">Debit Card</option>
+                                        <option value="UPI">UPI</option>
+                                        <option value="Net Banking">Net Banking</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Satisfaction Rating (1-10)</label>
+                                    <input type="number" class="form-control" id="satisfaction_rating" min="1" max="10" placeholder="1-10 scale" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Product Usage Score (1-100)</label>
+                                    <input type="number" class="form-control" id="product_usage_score" min="1" max="100" placeholder="How much they use product" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Engagement Score (1-100)</label>
+                                    <input type="number" class="form-control" id="engagement_score" min="1" max="100" placeholder="Customer engagement level" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Number of Support Tickets</label>
+                                    <input type="number" class="form-control" id="num_support_tickets" min="0" placeholder="Support tickets filed" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Number of Complaints</label>
+                                    <input type="number" class="form-control" id="num_complaints" min="0" placeholder="Complaints registered" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Login Frequency (per month)</label>
+                                    <input type="number" class="form-control" id="login_frequency" min="1" placeholder="Average logins per month" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Purchase (Days Ago)</label>
+                                    <input type="number" class="form-control" id="last_purchase_days_ago" min="1" placeholder="Days since last purchase" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Avg Session Duration (minutes)</label>
+                                    <input type="number" class="form-control" id="avg_session_duration" min="1" placeholder="Average session time" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mt-4">
+                                        <input class="form-check-input" type="checkbox" id="is_premium_member">
+                                        <label class="form-check-label" for="is_premium_member">
+                                            Premium Member
+                                        </label>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="has_referral">
+                                        <label class="form-check-label" for="has_referral">
+                                            Has Referral
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Predict Churn
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-redo me-2"></i>Reset
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p class="mt-3">Analyzing customer data...</p>
+                        </div>
+                        
+                        <div class="result-card card mt-4" id="resultCard">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <i class="fas fa-chart-pie me-2"></i>Prediction Result
+                                </h5>
+                                <div class="row align-items-center">
+                                    <div class="col-md-4 text-center">
+                                        <span class="churn-badge" id="churnBadge">-</span>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <p class="mb-2">
+                                            <strong>Churn Probability:</strong> 
+                                            <span id="churnProbability">0%</span>
+                                        </p>
+                                        <p class="mb-2">
+                                            <strong>Retention Probability:</strong> 
+                                            <span id="notChurnProbability">0%</span>
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>Risk Level:</strong> 
+                                            <span id="riskLevel">-</span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <hr>
+                                <div class="probability-bar mt-3">
+                                    <div class="probability-fill" id="probabilityBar" style="width: 0%; background: linear-gradient(90deg, #27ae60, #f39c12, #e74c3c);"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-1">
+                                    <small>Retention</small>
+                                    <small>Churn</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card feature-importance-card">
+                    <div class="card-header">
+                        <i class="fas fa-star me-2"></i>
+                        Top Risk Factors
+                    </div>
+                    <div class="card-body" id="featureImportance">
+                        <p class="text-center">Loading feature importance...</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Model Information
+                    </div>
+                    <div class="card-body" id="modelInfo">
+                        <p><strong>Model:</strong> Random Forest</p>
+                        <p><strong>Features:</strong> 19</p>
+                        <p><strong>Imbalance Handling:</strong> SMOTE</p>
+                        <p><strong>Algorithm:</strong> Classification</p>
+                    </div>
+                </div>
+                
+                <div class="card bg-warning bg-opacity-10">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+                        <ul class="mb-0 small">
+                            <li>High churn risk: >70% probability</li>
+                            <li>Medium risk: 40-70% probability</li>
+                            <li>Low risk: <40% probability</li>
+                            <li>Focus retention on high-risk customers</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            
+            const customerData = {
+                gender: document.getElementById('gender').value,
+                city_tier: document.getElementById('city_tier').value,
+                subscription_type: document.getElementById('subscription_type').value,
+                contract_length: document.getElementById('contract_length').value,
+                age: parseFloat(document.getElementById('age').value),
+                tenure_months: parseFloat(document.getElementById('tenure_months').value),
+                monthly_charge: parseFloat(document.getElementById('monthly_charge').value),
+                total_charges: parseFloat(document.getElementById('total_charges').value),
+                payment_method: document.getElementById('payment_method').value,
+                satisfaction_rating: parseFloat(document.getElementById('satisfaction_rating').value),
+                product_usage_score: parseFloat(document.getElementById('product_usage_score').value),
+                engagement_score: parseFloat(document.getElementById('engagement_score').value),
+                num_support_tickets: parseFloat(document.getElementById('num_support_tickets').value),
+                num_complaints: parseFloat(document.getElementById('num_complaints').value),
+                login_frequency: parseFloat(document.getElementById('login_frequency').value),
+                last_purchase_days_ago: parseFloat(document.getElementById('last_purchase_days_ago').value),
+                avg_session_duration: parseFloat(document.getElementById('avg_session_duration').value),
+                is_premium_member: document.getElementById('is_premium_member').checked ? 1 : 0,
+                has_referral: document.getElementById('has_referral').checked ? 1 : 0
+            };
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(customerData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    displayResult(data);
+                }
+            } catch (error) {
+                alert('Error making prediction: ' + error.message);
+            }
+            
+            loading.style.display = 'none';
+            resultCard.style.display = 'block';
+        });
+        
+        function displayResult(data) {
+            const churnBadge = document.getElementById('churnBadge');
+            const churnProbability = document.getElementById('churnProbability');
+            const notChurnProbability = document.getElementById('notChurnProbability');
+            const riskLevel = document.getElementById('riskLevel');
+            const probabilityBar = document.getElementById('probabilityBar');
+            const resultCard = document.getElementById('resultCard');
+            
+            churnBadge.textContent = data.prediction === 'Yes' ? 'Will Churn' : 'Will Not Churn';
+            churnProbability.textContent = data.churn_probability + '%';
+            notChurnProbability.textContent = data.not_churn_probability + '%';
+            riskLevel.textContent = data.risk_level;
+            probabilityBar.style.width = data.churn_probability + '%';
+            
+            resultCard.className = 'result-card card mt-4';
+            if (data.risk_level === 'High') {
+                resultCard.classList.add('high-risk');
+                churnBadge.className = 'churn-badge high';
+            } else if (data.risk_level === 'Medium') {
+                resultCard.classList.add('medium-risk');
+                churnBadge.className = 'churn-badge medium';
+            } else {
+                resultCard.classList.add('low-risk');
+                churnBadge.className = 'churn-badge low';
+            }
+        }
+        
+        async function loadFeatureImportance() {
+            try {
+                const response = await fetch('/feature_importance');
+                const data = await response.json();
+                
+                const container = document.getElementById('featureImportance');
+                const topFeatures = data.slice(0, 6);
+                
+                container.innerHTML = topFeatures.map(f => `
+                    <div class="feature-item">
+                        <div class="d-flex justify-content-between">
+                            <span>${f.feature.replace(/_/g, ' ')}</span>
+                            <span>${(f.importance * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="feature-bar">
+                            <div class="feature-bar-fill" style="width: ${f.importance * 100}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading feature importance:', error);
+            }
+        }
+        
+        async function showFeatureImportance() {
+            await loadFeatureImportance();
+        }
+        
+        async function showModelInfo() {
+            try {
+                const response = await fetch('/model_info');
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    const container = document.getElementById('modelInfo');
+                    container.innerHTML = `
+                        <p><strong>Model Type:</strong> ${data.model_type}</p>
+                        <p><strong>Estimators:</strong> ${data.n_estimators}</p>
+                        <p><strong>Max Depth:</strong> ${data.max_depth}</p>
+                        <p><strong>Features:</strong> ${data.features.length}</p>
+                        <p><strong>Class Balance:</strong> ${data.class_balance}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading model info:', error);
+            }
+        }
+        
+        // Load feature importance on page load
+        loadFeatureImportance();
+    </script>
+</body>
+</html>

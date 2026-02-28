@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spam Email Detector | ML Project</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 700px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .model-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .model-status.loaded {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .model-status.not-loaded {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result.spam {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+
+        .result.ham {
+            background: linear-gradient(135deg, #26de81 0%, #2bcbba 100%);
+            color: white;
+        }
+
+        .result h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            height: 25px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+
+        .confidence-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .sample-emails {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .sample-emails h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .sample-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .sample-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .sample-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .tech-stack {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tech-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Spam Email Detector</h1>
+            <p>Machine Learning NLP Classification with Naive Bayes</p>
+            <span class="badge">CountVectorizer + MultinomialNB</span>
+        </div>
+
+        <div class="content">
+            <!-- Model Status -->
+            {% if not model_loaded %}
+            <div class="model-status not-loaded">
+                ⚠️ Model not loaded. Please run <code>python train_model.py</code> first!
+            </div>
+            {% else %}
+            <div class="model-status loaded">
+                ✅ Model loaded and ready
+            </div>
+            {% endif %}
+
+            <!-- Error Message -->
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <!-- Prediction Form -->
+            <form action="/predict_form" method="POST">
+                <div class="form-group">
+                    <label for="email">Enter Email Content to Classify:</label>
+                    <textarea 
+                        id="email" 
+                        name="email" 
+                        placeholder="Paste your email text here to check if it's spam or not...
+
+Example: 'Congratulations! You've won a free lottery ticket! Click here to claim your prize now!'"
+                        required
+                    >{{ email_text or '' }}</textarea>
+                </div>
+                <button type="submit" class="btn" {% if not model_loaded %}disabled{% endif %}>
+                    🔍 Detect Spam
+                </button>
+            </form>
+
+            <!-- Prediction Result -->
+            {% if prediction %}
+            <div class="result {% if is_spam %}spam{% else %}ham{% endif %}">
+                <div class="result-icon">
+                    {% if is_spam %}
+                    🚫
+                    {% else %}
+                    ✅
+                    {% endif %}
+                </div>
+                <h2>
+                    {% if is_spam %}
+                    SPAM DETECTED!
+                    {% else %}
+                    NOT SPAM (Ham)
+                    {% endif %}
+                </h2>
+                <p>
+                    {% if is_spam %}
+                    This email has been classified as <strong>spam</strong>.
+                    {% else %}
+                    This email appears to be <strong>legitimate</strong>.
+                    {% endif %}
+                </p>
+                
+                {% if confidence %}
+                <div class="confidence-bar">
+                    <div class="confidence-fill" data-width="{{ confidence.spam_width }}"></div>
+                </div>
+                <div class="confidence-labels">
+                    <span>Ham: {{ confidence.ham }}%</span>
+                    <span>Spam: {{ confidence.spam }}%</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Sample Emails -->
+            <div class="sample-emails">
+                <h3>Try these sample emails:</h3>
+                <div class="sample-btns">
+                    <button class="sample-btn" onclick="setSample('spam')">🎰 Free Lottery Win</button>
+                    <button class="sample-btn" onclick="setSample('urgent')">⚠️ Urgent Account Verify</button>
+                    <button class="sample-btn" onclick="setSample('meeting')">📅 Meeting Request</button>
+                    <button class="sample-btn" onclick="setSample('offer')">💰 Money Making Offer</button>
+                    <button class="sample-btn" onclick="setSample('thanks')">🙏 Thank You Email</button>
+                    <button class="sample-btn" onclick="setSample('prince')">👑 Prince Inheritance</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Built with Flask + Scikit-Learn | NLP Classification</p>
+            <div class="tech-stack">
+                <span class="tech-badge">Python</span>
+                <span class="tech-badge">CountVectorizer</span>
+                <span class="tech-badge">Naive Bayes</span>
+                <span class="tech-badge">Flask</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const samples = {
+            spam: "Congratulations! You've won a free lottery ticket worth $1,000,000! Click here to claim your prize now! Limited time offer!",
+            urgent: "URGENT: Your bank account has been compromised! Verify your password immediately by clicking the link below to avoid losing your money!",
+            meeting: "Hi, can we schedule a meeting for tomorrow afternoon at 2 PM to discuss the project timeline? Please let me know if this works for you.",
+            offer: "Make $10,000 per month working from home! No experience needed! This secret investment will make you wealthy in just one week!",
+            thanks: "Thank you so much for your help with the presentation. I really appreciate it! The meeting went really well thanks to your input.",
+            prince: "Dear Friend, I am a prince from a foreign country and I need your help to transfer $50,000,000 out of the country. I will reward you generously!"
+        };
+
+        function setSample(type) {
+            document.getElementById('email').value = samples[type];
+        }
+        
+        // Set confidence bar width from data attribute
+        document.addEventListener('DOMContentLoaded', function() {
+            const fillElement = document.querySelector('.confidence-fill[data-width]');
+            if (fillElement) {
+                const width = fillElement.getAttribute('data-width');
+                fillElement.style.width = width + '%';
+            }
+        });
+    </script>
+</body>
+</html>

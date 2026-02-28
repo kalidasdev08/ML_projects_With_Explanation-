@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Recommendation System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #e94560, #0f3460);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card h2 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ccc;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: #e94560;
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: rgba(233, 69, 96, 0.5);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Movie Grid with Posters */
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .movie-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+        }
+        
+        .movie-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            background: #1a1a2e;
+        }
+        
+        .movie-info {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+        
+        .movie-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        .movie-year {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        
+        .movie-genres {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .genre-tag {
+            background: rgba(233, 69, 96, 0.3);
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+        
+        .movie-score {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .score-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .reason {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #e94560;
+        }
+        
+        .stat-label {
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .similar-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .user-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .similarity-bar {
+            width: 60px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .similarity-fill {
+            height: 100%;
+            background: #e94560;
+        }
+        
+        .user-ratings {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .rating-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .rating-card img {
+            width: 80px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .rating-stars {
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Movie Recommendation System</h1>
+            <p class="subtitle">Powered by Collaborative Filtering & Matrix Factorization</p>
+        </header>
+        
+        <div class="card animate">
+            <h2>📊 Model Statistics</h2>
+            <div class="stats-grid" id="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="n-users">-</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="n-movies">-</div>
+                    <div class="stat-label">Total Movies</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="n-factors">-</div>
+                    <div class="stat-label">Latent Factors</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card animate">
+            <h2>👤 Select User</h2>
+            <div class="form-group">
+                <label for="user-select">Choose a user to get personalized recommendations:</label>
+                <select id="user-select">
+                    <option value="">-- Select User --</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="card animate" id="recommendations-section" style="display: none;">
+            <h2>🎯 Your Recommendations</h2>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="all">All Recommendations</button>
+                <button class="tab-btn" data-tab="history">Based on Your History</button>
+                <button class="tab-btn" data-tab="similar">Similar Users</button>
+                <button class="tab-btn" data-tab="genre">By Genre</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-all">
+                <div class="movie-grid" id="all-recs"></div>
+            </div>
+            
+            <div class="tab-content" id="tab-history">
+                <div class="movie-grid" id="history-recs"></div>
+            </div>
+            
+            <div class="tab-content" id="tab-similar">
+                <h3 style="margin-bottom: 15px; color: #aaa;">Users with similar preferences:</h3>
+                <div class="similar-users" id="similar-users-list"></div>
+                <h3 style="margin: 20px 0 15px; color: #aaa;">Recommended movies:</h3>
+                <div class="movie-grid" id="similar-recs"></div>
+            </div>
+            
+            <div class="tab-content" id="tab-genre">
+                <div class="movie-grid" id="genre-recs"></div>
+            </div>
+        </div>
+        
+        <div class="card animate" id="user-history-section" style="display: none;">
+            <h2>📽️ Your Rated Movies</h2>
+            <div class="user-ratings" id="user-ratings"></div>
+        </div>
+        
+        <footer>
+            <p>Movie Recommendation System - Using Collaborative Filtering & Matrix Factorization</p>
+        </footer>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadUsers();
+            setupTabs();
+        });
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                
+                document.getElementById('n-users').textContent = data.n_users;
+                document.getElementById('n-movies').textContent = data.n_movies;
+                document.getElementById('n-factors').textContent = data.n_factors;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+        
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/users');
+                const data = await response.json();
+                
+                const select = document.getElementById('user-select');
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = 'User ' + user;
+                    select.appendChild(option);
+                });
+                
+                select.addEventListener('change', (e) => {
+                    if (e.target.value) {
+                        currentUser = e.target.value;
+                        loadRecommendations(e.target.value);
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+        
+        async function loadRecommendations(userId) {
+            document.getElementById('recommendations-section').style.display = 'block';
+            document.getElementById('user-history-section').style.display = 'block';
+            
+            // Load user ratings
+            loadUserRatings(userId);
+            
+            // Load all recommendations
+            loadAllRecommendations(userId);
+            
+            // Load recommendations by history
+            loadHistoryRecommendations(userId);
+            
+            // Load similar users and their recommendations
+            loadSimilarUsersRecommendations(userId);
+            
+            // Load genre recommendations
+            loadGenreRecommendations(userId);
+        }
+        
+        async function loadUserRatings(userId) {
+            try {
+                const response = await fetch(`/api/user/${userId}/ratings`);
+                const data = await response.json();
+                
+                const container = document.getElementById('user-ratings');
+                
+                if (!data.ratings || data.ratings.length === 0) {
+                    container.innerHTML = '<p>No rated movies found.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.ratings.map(rating => `
+                    <div class="rating-card">
+                        <img src="${rating.poster || 'https://placehold.co/80x120/1a1a2e/e94560?text=No+Poster'}" alt="${rating.title}" onerror="this.onerror=null; this.src='https://placehold.co/80x120/1a1a2e/e94560?text=No+Poster'">
+                        <div>
+                            <div class="movie-title">${rating.title}</div>
+                            <div class="movie-year">${rating.year || 'N/A'}</div>
+                            <div class="rating-stars">${'★'.repeat(rating.rating)}${'☆'.repeat(5 - rating.rating)}</div>
+                            <div class="movie-genres" style="margin-top: 5px;">
+                                ${rating.genres.map(g => `<span class="genre-tag">${g}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading user ratings:', error);
+            }
+        }
+        
+        async function loadAllRecommendations(userId) {
+            try {
+                const response = await fetch('/api/recommend', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, n_recommendations: 10 })
+                });
+                
+                const data = await response.json();
+                const container = document.getElementById('all-recs');
+                
+                if (!data.recommendations || data.recommendations.length === 0) {
+                    container.innerHTML = '<p>No recommendations available.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.recommendations.map(rec => createMovieCard(rec)).join('');
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+        
+        async function loadHistoryRecommendations(userId) {
+            try {
+                const response = await fetch('/api/recommend/history', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, n_recommendations: 5 })
+                });
+                
+                const data = await response.json();
+                const container = document.getElementById('history-recs');
+                
+                if (!data.recommendations || data.recommendations.length === 0) {
+                    container.innerHTML = '<p>No recommendations based on your history.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.recommendations.map(rec => createMovieCard(rec)).join('');
+            } catch (error) {
+                console.error('Error loading history recommendations:', error);
+            }
+        }
+        
+        async function loadSimilarUsersRecommendations(userId) {
+            try {
+                // Get similar users
+                const usersResponse = await fetch(`/api/similar-users/${userId}`);
+                const usersData = await usersResponse.json();
+                
+                const usersContainer = document.getElementById('similar-users-list');
+                
+                if (!usersData.similar_users || usersData.similar_users.length === 0) {
+                    usersContainer.innerHTML = '<p>No similar users found.</p>';
+                } else {
+                    usersContainer.innerHTML = usersData.similar_users.map(user => `
+                        <div class="user-tag">
+                            <span>User ${user.user_id}</span>
+                            <div class="similarity-bar">
+                                <div class="similarity-fill" style="width: ${user.similarity * 100}%"></div>
+                            </div>
+                            <span>${(user.similarity * 100).toFixed(0)}%</span>
+                        </div>
+                    `).join('');
+                }
+                
+                // Get recommendations from similar users
+                const recsResponse = await fetch('/api/recommend/similar-users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, n_recommendations: 5 })
+                });
+                
+                const recsData = await recsResponse.json();
+                const recsContainer = document.getElementById('similar-recs');
+                
+                if (!recsData.recommendations || recsData.recommendations.length === 0) {
+                    recsContainer.innerHTML = '<p>No recommendations from similar users.</p>';
+                    return;
+                }
+                
+                recsContainer.innerHTML = recsData.recommendations.map(rec => createMovieCard(rec)).join('');
+            } catch (error) {
+                console.error('Error loading similar users recommendations:', error);
+            }
+        }
+        
+        async function loadGenreRecommendations(userId) {
+            try {
+                const response = await fetch('/api/recommend/genre', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, n_recommendations: 5 })
+                });
+                
+                const data = await response.json();
+                const container = document.getElementById('genre-recs');
+                
+                if (!data.recommendations || data.recommendations.length === 0) {
+                    container.innerHTML = '<p>No genre-based recommendations.</p>';
+                    return;
+                }
+                
+                container.innerHTML = data.recommendations.map(rec => createMovieCard(rec)).join('');
+            } catch (error) {
+                console.error('Error loading genre recommendations:', error);
+            }
+        }
+        
+        function createMovieCard(rec) {
+            // Use placeholder for missing posters
+            const placeholderUrl = 'https://placehold.co/200x300/1a1a2e/e94560?text=No+Poster';
+            const poster = rec.poster || placeholderUrl;
+            return `
+                <div class="movie-card">
+                    <img src="${poster}" alt="${rec.title}" class="movie-poster" onerror="this.onerror=null; this.src='${placeholderUrl}'">
+                    <div class="movie-info">
+                        <div class="movie-title" title="${rec.title}">${rec.title}</div>
+                        <div class="movie-year">${rec.year || 'N/A'}</div>
+                        <div class="movie-genres" style="flex-wrap: wrap; margin-bottom: auto;">
+                            ${rec.genres.map(g => `<span class="genre-tag">${g}</span>`).join('')}
+                        </div>
+                        <div class="movie-score">
+                            <span class="score-value">${rec.score ? rec.score.toFixed(1) : 'N/A'}</span>
+                            <span class="reason">${rec.reason || ''}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all
+                    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Add active to clicked
+                    tab.classList.add('active');
+                    document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

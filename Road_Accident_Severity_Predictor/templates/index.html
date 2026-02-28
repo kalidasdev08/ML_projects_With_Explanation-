@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Accident Severity Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: #e94560;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        @media (min-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #e94560;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            color: #c0c0c0;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #e94560;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+        
+        .btn-predict {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+        }
+        
+        .result-card {
+            text-align: center;
+        }
+        
+        .severity-result {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .severity-slight {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: #fff;
+        }
+        
+        .severity-serious {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: #fff;
+        }
+        
+        .severity-fatal {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: #fff;
+        }
+        
+        .probability-bar {
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .probability-label {
+            color: #c0c0c0;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .bar-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .bar-slight { background: linear-gradient(90deg, #2ecc71, #27ae60); }
+        .bar-serious { background: linear-gradient(90deg, #f39c12, #e67e22); }
+        .bar-fatal { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+        
+        .error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+            border-radius: 10px;
+            padding: 15px;
+            color: #e74c3c;
+            margin-top: 20px;
+        }
+        
+        .input-summary {
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .input-summary h3 {
+            color: #fff;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .input-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        
+        .input-item span:first-child {
+            color: #a0a0a0;
+        }
+        
+        .input-item span:last-child {
+            color: #e94560;
+            font-weight: bold;
+        }
+        
+        .info-box {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #3498db;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 Road Accident Severity Predictor</h1>
+            <p class="subtitle">Predict fatality levels using road and weather conditions</p>
+        </header>
+        
+        <div class="main-content">
+            <!-- Input Form -->
+            <div class="card">
+                <h2>📋 Accident Details</h2>
+                <form action="/predict" method="POST">
+                    <div class="form-group">
+                        <label>Weather Condition</label>
+                        <select name="weather_condition" required>
+                            {% for option in feature_options.weather_condition %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Road Type</label>
+                        <select name="road_type" required>
+                            {% for option in feature_options.road_type %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Road Surface</label>
+                        <select name="road_surface" required>
+                            {% for option in feature_options.road_surface %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Light Condition</label>
+                        <select name="light_condition" required>
+                            {% for option in feature_options.light_condition %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vehicle Type</label>
+                        <select name="vehicle_type" required>
+                            {% for option in feature_options.vehicle_type %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Driver Condition</label>
+                        <select name="driver_condition" required>
+                            {% for option in feature_options.driver_condition %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Traffic Density</label>
+                        <select name="traffic_density" required>
+                            {% for option in feature_options.traffic_density %}
+                            <option value="{{ option }}">{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Speed Limit (km/h)</label>
+                        <input type="number" name="speed_limit" value="60" min="20" max="130" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Vehicle Speed (km/h)</label>
+                        <input type="number" name="vehicle_speed" value="50" min="0" max="150" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Number of Vehicles</label>
+                        <input type="number" name="number_of_vehicles" value="1" min="1" max="10" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Expected Casualties</label>
+                        <input type="number" name="number_of_casualties" value="0" min="0" max="20" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Humidity (%)</label>
+                        <input type="number" name="humidity" value="50" min="20" max="100" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Temperature (°C)</label>
+                        <input type="number" name="temperature" value="20" min="-10" max="45" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Wind Speed (km/h)</label>
+                        <input type="number" name="wind_speed" value="10" min="0" max="50" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Visibility (meters)</label>
+                        <input type="number" name="visibility" value="5000" min="100" max="10000" required>
+                    </div>
+                    
+                    <button type="submit" class="btn-predict">🔮 Predict Severity</button>
+                </form>
+            </div>
+            
+            <!-- Results -->
+            <div class="card result-card">
+                <h2>📊 Prediction Result</h2>
+                
+                {% if error %}
+                <div class="error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+                {% endif %}
+                
+                {% if prediction %}
+                <div class="severity-result severity-{{ prediction|lower }}">
+                    {{ prediction }}
+                </div>
+                
+                <h3>Probability Distribution</h3>
+                
+                {% if probabilities %}
+                <div class="probability-bar">
+                    <div class="probability-label">Slight Injury: {{ probabilities.get('Slight', 0) }}%</div>
+                    <div class="bar-container">
+                        <div class="bar-fill bar-slight" style="width: {{ probabilities.get('Slight', 0) }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="probability-bar">
+                    <div class="probability-label">Serious Injury: {{ probabilities.get('Serious', 0) }}%</div>
+                    <div class="bar-container">
+                        <div class="bar-fill bar-serious" style="width: {{ probabilities.get('Serious', 0) }}%"></div>
+                    </div>
+                </div>
+                
+                <div class="probability-bar">
+                    <div class="probability-label">Fatal: {{ probabilities.get('Fatal', 0) }}%</div>
+                    <div class="bar-container">
+                        <div class="bar-fill bar-fatal" style="width: {{ probabilities.get('Fatal', 0) }}%"></div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if input_data %}
+                <div class="input-summary">
+                    <h3>Input Summary</h3>
+                    <div class="input-item">
+                        <span>Weather</span>
+                        <span>{{ input_data.weather_condition }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Road</span>
+                        <span>{{ input_data.road_type }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Surface</span>
+                        <span>{{ input_data.road_surface }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Light</span>
+                        <span>{{ input_data.light_condition }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Vehicle</span>
+                        <span>{{ input_data.vehicle_type }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Driver</span>
+                        <span>{{ input_data.driver_condition }}</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Speed Limit</span>
+                        <span>{{ input_data.speed_limit }} km/h</span>
+                    </div>
+                    <div class="input-item">
+                        <span>Vehicle Speed</span>
+                        <span>{{ input_data.vehicle_speed }} km/h</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% else %}
+                <div class="info-box">
+                    <p>Enter the accident details in the form and click <strong>Predict Severity</strong> to see the predicted fatality level.</p>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: left; color: #a0a0a0;">
+                    <h4 style="color: #fff; margin-bottom: 15px;">Severity Levels:</h4>
+                    <p style="margin-bottom: 10px;"><span style="color: #2ecc71;">●</span> <strong>Slight:</strong> Minor injuries, no fatalities</p>
+                    <p style="margin-bottom: 10px;"><span style="color: #f39c12;">●</span> <strong>Serious:</strong> Significant injuries, hospitalization</p>
+                    <p style="margin-bottom: 10px;"><span style="color: #e74c3c;">●</span> <strong>Fatal:</strong> Death resulting from the accident</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <footer>
+            <p>Road Accident Severity Predictor | Machine Learning Model</p>
+        </footer>
+    </div>
+</body>
+</html>

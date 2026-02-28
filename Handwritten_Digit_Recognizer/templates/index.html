@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Digit Recognizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .drawing-section, .result-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #drawing-canvas {
+            border: 2px solid #00d4ff;
+            border-radius: 10px;
+            background: #000;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .canvas-placeholder {
+            width: 280px;
+            height: 280px;
+            border: 2px dashed #444;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .result-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-height: 300px;
+        }
+
+        .prediction-result {
+            text-align: center;
+        }
+
+        .predicted-digit {
+            font-size: 6rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .confidence {
+            font-size: 1.2rem;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        .probabilities {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .prob-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .prob-label {
+            width: 30px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .prob-track {
+            flex: 1;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .prob-value {
+            width: 50px;
+            text-align: right;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .placeholder-text {
+            color: #666;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        .upload-section {
+            margin-top: 20px;
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-section p {
+            color: #888;
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .tips {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 8px;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .tips h4 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .tips ul {
+            list-style: none;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        .tips li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
+
+        .tips li::before {
+            content: "•";
+            color: #00d4ff;
+            position: absolute;
+            left: 0;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔢 Handwritten Digit Recognizer</h1>
+            <p class="subtitle">Draw a digit (0-9) and let AI identify it</p>
+        </header>
+
+        <div class="main-content">
+            <div class="drawing-section">
+                <h2 class="section-title">Draw Your Digit</h2>
+                <div class="canvas-container">
+                    <canvas id="drawing-canvas" width="280" height="280"></canvas>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="clearCanvas()">Clear</button>
+                        <button class="btn btn-primary" onclick="predict()">Recognize</button>
+                    </div>
+                </div>
+                <div class="upload-section">
+                    <p>Or upload an image file:</p>
+                    <div class="file-input-wrapper">
+                        <label for="file-input" class="btn btn-secondary">Choose File</label>
+                        <input type="file" id="file-input" accept="image/*" onchange="handleFileUpload(event)">
+                    </div>
+                    <p id="file-name" style="margin-top: 10px; color: #888; font-size: 0.9rem;"></p>
+                </div>
+                <div class="tips">
+                    <h4>💡 Tips for Better Results:</h4>
+                    <ul>
+                        <li>Draw the digit clearly in the center</li>
+                        <li>Use a single stroke when possible</li>
+                        <li>Keep the digit proportional</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h2 class="section-title">Prediction Result</h2>
+                <div class="result-display">
+                    <div class="loading" id="loading">
+                        <div class="spinner"></div>
+                        <p>Analyzing...</p>
+                    </div>
+                    <div class="placeholder-text" id="placeholder">
+                        Draw a digit and click "Recognize"<br>or upload an image
+                    </div>
+                    <div class="prediction-result" id="result" style="display: none;">
+                        <div class="predicted-digit" id="digit">0</div>
+                        <div class="confidence">Confidence: <span id="confidence">0%</span></div>
+                        <div class="probabilities" id="probabilities"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Powered by TensorFlow CNN Model trained on MNIST Dataset</p>
+        </footer>
+    </div>
+
+    <script>
+        // Canvas drawing functionality
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        // Set canvas background to black
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Drawing settings
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 15;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        function getPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const pos = getPosition(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            
+            lastX = pos.x;
+            lastY = pos.y;
+            e.preventDefault();
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function clearCanvas() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+        }
+
+        function predict() {
+            const canvasData = canvas.toDataURL('image/png');
+            sendPrediction({ canvas_data: canvasData });
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.getElementById('file-name').textContent = file.name;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            showLoading();
+            
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResult(data);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Error: ' + error.message);
+            });
+        }
+
+        function sendPrediction(data) {
+            showLoading();
+            
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResult(data);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showError('Error: ' + error.message);
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function displayResult(data) {
+            document.getElementById('digit').textContent = data.digit;
+            document.getElementById('confidence').textContent = (data.confidence * 100).toFixed(1) + '%';
+            
+            // Display probability bars
+            const probabilitiesDiv = document.getElementById('probabilities');
+            probabilitiesDiv.innerHTML = '';
+            
+            const probs = data.probabilities;
+            for (let i = 0; i < 10; i++) {
+                const prob = probs[i] * 100;
+                const html = `
+                    <div class="prob-bar">
+                        <span class="prob-label">${i}</span>
+                        <div class="prob-track">
+                            <div class="prob-fill" style="width: ${prob}%"></div>
+                        </div>
+                        <span class="prob-value">${prob.toFixed(1)}%</span>
+                    </div>
+                `;
+                probabilitiesDiv.innerHTML += html;
+            }
+            
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('placeholder').innerHTML = 
+                '<span style="color: #ff4444;">' + message + '</span>';
+            document.getElementById('placeholder').style.display = 'block';
+        }
+
+        // Check model status on load
+        fetch('/health')
+            .then(response => response.json())
+            .then(data => {
+                if (!data.model_loaded) {
+                    console.warn('Model not loaded. Please run train_model.py first.');
+                }
+            })
+            .catch(error => {
+                console.error('Health check failed:', error);
+            });
+    </script>
+</body>
+</html>

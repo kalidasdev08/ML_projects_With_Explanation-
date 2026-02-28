@@ -1,0 +1,30 @@
+# AI Voice Assistant - Mini Alexa
+# Dependencies for voice recognition and NLP
+
+# Speech Recognition
+SpeechRecognition>=3.8.1
+
+# Text to Speech
+pyttsx3>=2.90
+
+# Wikipedia API
+wikipedia>=1.4.0
+
+# NLP and data processing
+nltk>=3.8.1
+requests>=2.28.0
+
+# Optional: Weather API
+# pip install pyowm>=3.0.0 for weather (requires API key)
+
+# Web browser control
+pywhatkit>=3.8.1
+
+# Date and time utilities
+datetime
+
+# For better speech recognition (optional)
+# pip install pocketsphinx for offline recognition on Linux/Windows
+
+# For web search (alternative)
+# google-search-results>=2.4.0

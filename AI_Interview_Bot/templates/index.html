@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interview Bot - Practice Interviews</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+        }
+        
+        .start-screen h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-hint {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .category-btn {
+            padding: 15px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .category-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .category-btn.selected {
+            background: #667eea;
+            color: white;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            margin-top: 10px;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        /* Interview Screen */
+        .interview-screen {
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .question-number {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .category-tag {
+            background: #f0f0f0;
+            color: #666;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            color: #333;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .answer-area {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .answer-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .word-count {
+            text-align: right;
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .skip-btn {
+            background: #f0f0f0;
+            color: #666;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .skip-btn:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Results Screen */
+        .results-screen {
+            display: none;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .overall-score {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .rating {
+            font-size: 1.5rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .rating-description {
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+        
+        .score-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .score-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .answer-reviews {
+            margin-top: 30px;
+        }
+        
+        .answer-review {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .answer-review h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .answer-review .score-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        .answer-review p {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .restart-btn {
+            display: block;
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Feedback Section */
+        .feedback-section {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f7ff;
+            border-radius: 12px;
+            border: 2px solid #667eea;
+        }
+        
+        .feedback-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .score-bars {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .score-bar-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .score-bar-label {
+            min-width: 80px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        .score-bar-track {
+            flex: 1;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .score-bar-fill {
+            height: 100%;
+            background: #667eea;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .feedback-text {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        .next-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        .next-btn:hover {
+            background: #218838;
+        }
+
+        /* API Key Notice */
+        .api-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        
+        .divider span {
+            padding: 0 15px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 AI Interview Bot</h1>
+            <p>Practice with unique AI-generated interview questions</p>
+        </div>
+        
+        <!-- Start Screen -->
+        <div class="card start-screen" id="startScreen">
+            <h2>Start Your Practice Interview</h2>
+            <p>Get unique questions generated just for you!</p>
+            
+            <div class="input-group">
+                <label for="jobRole">🎯 Target Job Role (Optional)</label>
+                <input type="text" id="jobRole" placeholder="e.g., Software Engineer, Data Scientist, Product Manager">
+                <p class="input-hint">Enter a job title for personalized questions tailored to that role</p>
+            </div>
+            
+            <div class="divider"><span>OR select a category</span></div>
+            
+            <div class="category-grid">
+                <button class="category-btn" data-category="technical">💻 Technical</button>
+                <button class="category-btn" data-category="behavioral">🎯 Behavioral</button>
+                <button class="category-btn" data-category="situational">⚡ Situational</button>
+                <button class="category-btn" data-category="general">📋 General</button>
+            </div>
+            
+            <div class="api-notice" id="apiNotice" style="display: none;">
+                ⚠️ No Gemini API key detected. Using basic question generation and evaluation.
+            </div>
+            
+            <button class="start-btn" onclick="startInterview()">Start Interview</button>
+        </div>
+        
+        <!-- Interview Screen -->
+        <div class="card interview-screen" id="interviewScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            
+            <div class="question-header">
+                <span class="question-number" id="questionNumber">Question 1 of 5</span>
+                <span class="category-tag" id="categoryTag">Technical</span>
+            </div>
+            
+            <div class="question-text" id="questionText">
+                Generating question...
+            </div>
+            
+            <textarea 
+                class="answer-area" 
+                id="answerArea"
+                placeholder="Type your answer here..."
+                oninput="updateWordCount()"
+            ></textarea>
+            
+            <div class="word-count" id="wordCount">Words: 0</div>
+            
+            <div class="action-buttons">
+                <button class="submit-btn" onclick="submitAnswer()">Submit Answer</button>
+                <button class="skip-btn" onclick="skipQuestion()">Skip</button>
+            </div>
+            
+            <!-- Feedback Section -->
+            <div class="feedback-section" id="feedbackSection">
+                <h3>📊 Answer Evaluation</h3>
+                <div class="score-bars">
+                    <div class="score-bar-item">
+                        <span class="score-bar-label">Overall</span>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill" id="overallBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-bar-item">
+                        <span class="score-bar-label">Clarity</span>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill" id="clarityBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-bar-item">
+                        <span class="score-bar-label">Relevance</span>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill" id="relevanceBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="score-bar-item">
+                        <span class="score-bar-label">Depth</span>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill" id="depthBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                <p class="feedback-text" id="feedbackText"></p>
+                <button class="next-btn" onclick="nextQuestion()">Next Question →</button>
+            </div>
+        </div>
+        
+        <!-- Results Screen -->
+        <div class="card results-screen" id="resultsScreen">
+            <div class="results-header">
+                <h2>Interview Complete!</h2>
+                <div class="overall-score" id="overallScore">0</div>
+                <div class="rating" id="rating">-</div>
+                <p class="rating-description" id="ratingDescription"></p>
+            </div>
+            
+            <div class="score-breakdown">
+                <div class="score-item">
+                    <div class="score-label">Clarity</div>
+                    <div class="score-value" id="clarityScore">-</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Relevance</div>
+                    <div class="score-value" id="relevanceScore">-</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Depth</div>
+                    <div class="score-value" id="depthScore">-</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Specificity</div>
+                    <div class="score-value" id="specificityScore">-</div>
+                </div>
+            </div>
+            
+            <div class="answer-reviews" id="answerReviews"></div>
+            
+            <button class="restart-btn" onclick="restartInterview()">Start New Interview</button>
+        </div>
+        
+        <!-- Loading -->
+        <div class="card loading" id="loadingScreen" style="display: none;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #666;" id="loadingText">Generating unique question...</p>
+        </div>
+    </div>
+    
+    <script>
+        let selectedCategory = 'all';
+        let currentQuestionId = null;
+        let questionData = null;
+        
+        // Category selection
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedCategory = this.dataset.category;
+                // Clear job role when category is selected
+                document.getElementById('jobRole').value = '';
+            });
+        });
+        
+        // Job role input - clears category selection
+        document.getElementById('jobRole').addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                selectedCategory = 'all';
+            }
+        });
+        
+        async function startInterview() {
+            const jobRole = document.getElementById('jobRole').value.trim();
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('loadingScreen').style.display = 'block';
+            document.getElementById('loadingText').textContent = jobRole 
+                ? `Generating personalized questions for ${jobRole}...`
+                : 'Generating unique interview questions...';
+            
+            const response = await fetch('/start-interview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    category: selectedCategory,
+                    job_role: jobRole
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('interviewScreen').style.display = 'block';
+                displayQuestion(data.question, data.current_question, data.total_questions);
+            } else {
+                alert('Error starting interview: ' + data.message);
+                document.getElementById('loadingScreen').style.display = 'none';
+                document.getElementById('startScreen').style.display = 'block';
+            }
+        }
+        
+        function displayQuestion(question, current, total) {
+            currentQuestionId = question.id;
+            questionData = question;
+            
+            document.getElementById('questionNumber').textContent = `Question ${current} of ${total}`;
+            
+            // Display category with icon
+            const categoryIcons = {
+                'technical': '💻',
+                'behavioral': '🎯',
+                'situational': '⚡',
+                'general': '📋'
+            };
+            const icon = categoryIcons[question.category] || '📋';
+            document.getElementById('categoryTag').textContent = `${icon} ${question.category.charAt(0).toUpperCase() + question.category.slice(1)}`;
+            
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('answerArea').value = '';
+            document.getElementById('wordCount').textContent = 'Words: 0';
+            document.getElementById('feedbackSection').style.display = 'none';
+            document.getElementById('answerArea').disabled = false;
+            
+            const progress = ((current - 1) / total) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        function updateWordCount() {
+            const text = document.getElementById('answerArea').value;
+            const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('wordCount').textContent = `Words: ${words}`;
+        }
+        
+        async function submitAnswer() {
+            const answer = document.getElementById('answerArea').value.trim();
+            
+            if (!answer) {
+                alert('Please provide an answer before submitting.');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loadingScreen').style.display = 'block';
+            document.getElementById('loadingText').textContent = 'Evaluating your answer with AI...';
+            document.getElementById('interviewScreen').querySelector('.action-buttons').style.display = 'none';
+            
+            const response = await fetch('/submit-answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    answer: answer,
+                    question_id: currentQuestionId
+                })
+            });
+            
+            const data = await response.json();
+            
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('interviewScreen').style.display = 'block';
+            
+            if (data.success) {
+                displayFeedback(data.evaluation);
+            } else {
+                alert('Error evaluating answer: ' + data.message);
+                document.getElementById('interviewScreen').querySelector('.action-buttons').style.display = 'flex';
+            }
+        }
+        
+        function displayFeedback(evaluation) {
+            document.getElementById('answerArea').disabled = true;
+            
+            // Update score bars
+            document.getElementById('overallBar').style.width = evaluation.overall_score + '%';
+            document.getElementById('clarityBar').style.width = (evaluation.clarity || 0) + '%';
+            document.getElementById('relevanceBar').style.width = (evaluation.relevance || 0) + '%';
+            document.getElementById('depthBar').style.width = (evaluation.depth || 0) + '%';
+            
+            // Build detailed feedback
+            let detailedFeedback = `<strong>Overall Score: ${evaluation.overall_score}/100</strong><br><br>`;
+            
+            if (evaluation.strengths && evaluation.strengths.length > 0) {
+                detailedFeedback += `<strong>✓ Strengths:</strong><br>`;
+                evaluation.strengths.forEach(s => {
+                    detailedFeedback += `• ${s}<br>`;
+                });
+                detailedFeedback += '<br>';
+            }
+            
+            if (evaluation.areas_for_improvement && evaluation.areas_for_improvement.length > 0) {
+                detailedFeedback += `<strong>📝 Areas for Improvement:</strong><br>`;
+                evaluation.areas_for_improvement.forEach(a => {
+                    detailedFeedback += `• ${a}<br>`;
+                });
+                detailedFeedback += '<br>';
+            }
+            
+            detailedFeedback += `<strong>💡 Feedback:</strong> ${evaluation.detailed_feedback || 'Good effort!'}`;
+            
+            document.getElementById('feedbackText').innerHTML = detailedFeedback;
+            document.getElementById('feedbackSection').style.display = 'block';
+        }
+        
+        async function skipQuestion() {
+            await nextQuestion();
+        }
+        
+        async function nextQuestion() {
+            const response = await fetch('/next-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('interviewScreen').style.display = 'none';
+                document.getElementById('loadingScreen').style.display = 'block';
+                document.getElementById('loadingText').textContent = 'Generating next question...';
+                
+                // Small delay to show loading
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                    document.getElementById('interviewScreen').style.display = 'block';
+                    document.getElementById('interviewScreen').querySelector('.action-buttons').style.display = 'flex';
+                    displayQuestion(data.question, data.current_question, data.total_questions);
+                }, 500);
+            } else {
+                // Show results
+                showResults();
+            }
+        }
+        
+        async function showResults() {
+            const response = await fetch('/get-results');
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('interviewScreen').style.display = 'none';
+                document.getElementById('resultsScreen').style.display = 'block';
+                
+                const results = data.results;
+                
+                // Update scores
+                document.getElementById('overallScore').textContent = results.average_scores.overall;
+                document.getElementById('rating').textContent = results.rating;
+                document.getElementById('ratingDescription').textContent = results.description;
+                
+                document.getElementById('clarityScore').textContent = results.average_scores.clarity;
+                document.getElementById('relevanceScore').textContent = results.average_scores.relevance;
+                document.getElementById('depthScore').textContent = results.average_scores.depth;
+                document.getElementById('specificityScore').textContent = results.average_scores.specificity;
+                
+                // Build answer reviews
+                const reviewsContainer = document.getElementById('answerReviews');
+                reviewsContainer.innerHTML = '<h3>Answer Reviews</h3>';
+                
+                results.answers.forEach((answer, index) => {
+                    const review = document.createElement('div');
+                    review.className = 'answer-review';
+                    review.innerHTML = `
+                        <h4>Q${index + 1}: ${answer.question.substring(0, 80)}...</h4>
+                        <span class="score-badge">Score: ${answer.score}</span>
+                        <p><strong>Your Answer:</strong> ${answer.answer.substring(0, 150)}${answer.answer.length > 150 ? '...' : ''}</p>
+                        <p style="margin-top: 10px;"><strong>Feedback:</strong> ${answer.feedback || 'Good effort!'}</p>
+                    `;
+                    reviewsContainer.appendChild(review);
+                });
+            }
+        }
+        
+        async function restartInterview() {
+            await fetch('/reset-interview', { method: 'POST' });
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('interviewScreen').style.display = 'none';
+            document.getElementById('jobRole').value = '';
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+        }
+    </script>
+</body>
+</html>

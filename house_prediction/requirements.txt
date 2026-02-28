@@ -1,0 +1,11 @@
+# House Price Prediction - Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core dependencies
+flask>=2.0.0
+numpy>=1.21.0
+pandas>=1.3.0
+scikit-learn>=1.0.0
+
+# For web interface (optional)
+# werkzeug>=2.0.0

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Sign Recognition - CNN Deep Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7, #f107a3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid #00d4ff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #00d4ff;
+            margin: 5px;
+        }
+        
+        .badge.python {
+            background: rgba(55, 118, 171, 0.2);
+            border-color: #3776ab;
+            color: #3776ab;
+        }
+        
+        .badge.tensorflow {
+            background: rgba(255, 106, 0, 0.2);
+            border-color: #ff6a00;
+            color: #ff6a00;
+        }
+        
+        .badge.cnn {
+            background: rgba(123, 47, 247, 0.2);
+            border-color: #7b2ff7;
+            color: #7b2ff7;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .upload-area {
+            border: 2px dashed rgba(0, 212, 255, 0.5);
+            border-radius: 15px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .upload-area:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .upload-area.dragover {
+            border-color: #7b2ff7;
+            background: rgba(123, 47, 247, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+        
+        .upload-hint {
+            font-size: 0.9rem;
+            color: #707070;
+        }
+        
+        .upload-input {
+            display: none;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #7b2ff7);
+            color: white;
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .preview-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .preview-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+        
+        .image-preview {
+            width: 100%;
+            min-height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
+        
+        .placeholder {
+            text-align: center;
+            color: #707070;
+        }
+        
+        .placeholder-icon {
+            font-size: 5rem;
+            margin-bottom: 15px;
+        }
+        
+        .results-section {
+            margin-top: 30px;
+        }
+        
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:nth-child(1) {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .result-card:nth-child(2) {
+            border-color: #7b2ff7;
+        }
+        
+        .result-card:nth-child(3) {
+            border-color: #f107a3;
+        }
+        
+        .result-card:nth-child(4) {
+            border-color: #ff6a00;
+        }
+        
+        .result-card:nth-child(5) {
+            border-color: #00ff88;
+        }
+        
+        .result-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #a0a0a0;
+            margin-right: 15px;
+        }
+        
+        .result-class {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .result-confidence {
+            float: right;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid #ff3b30;
+            border-radius: 10px;
+            padding: 15px;
+            color: #ff3b30;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #707070;
+            font-size: 0.9rem;
+        }
+        
+        footer a {
+            color: #00d4ff;
+            text-decoration: none;
+        }
+        
+        .info-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-box h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+        
+        .info-box ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .info-box li {
+            padding: 8px 0;
+            color: #a0a0a0;
+        }
+        
+        .info-box li::before {
+            content: "✓ ";
+            color: #00d4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚦 Traffic Sign Recognition</h1>
+            <p class="subtitle">Deep Learning CNN for Self-Driving Cars</p>
+            <div>
+                <span class="badge python">Python</span>
+                <span class="badge tensorflow">TensorFlow</span>
+                <span class="badge cnn">CNN</span>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="upload-section">
+                <h2 style="margin-bottom: 20px;">📤 Upload Image</h2>
+                
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">🖼️</div>
+                    <p class="upload-text">Drag & drop an image or video here</p>
+                    <p class="upload-hint">or click to browse (supports images & videos)</p>
+                    <input type="file" class="upload-input" id="fileInput" accept="image/*,video/*">
+                </div>
+                
+                <button class="btn btn-primary" id="recognizeBtn" disabled>
+                    🔍 Recognize Traffic Sign
+                </button>
+                
+                <div class="error-message" id="errorMessage"></div>
+                
+                <div class="info-box">
+                    <h3>Supported Formats</h3>
+                    <ul>
+                        <li>Images: PNG, JPG, JPEG, GIF, BMP, WebP</li>
+                        <li>Videos: MP4, AVI, MOV, MKV, WebM</li>
+                        <li>Speed Limit Signs (20-120 km/h)</li>
+                        <li>Prohibition & Warning Signs</li>
+                        <li>Mandatory Signs</li>
+                        <li>And 43+ more traffic sign categories</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="preview-section">
+                <h2 class="preview-title">📊 Prediction Results</h2>
+                
+                <div class="image-preview" id="imagePreview">
+                    <div class="placeholder" id="placeholder">
+                        <div class="placeholder-icon">🚗</div>
+                        <p>Upload an image to see predictions</p>
+                    </div>
+                </div>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing traffic sign...</p>
+                </div>
+                
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <h3 style="margin-bottom: 15px; color: #fff;">Top Predictions</h3>
+                    <div id="resultsList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Traffic Sign Recognition using Convolutional Neural Networks (CNN)</p>
+            <p>Powered by TensorFlow & Flask</p>
+        </footer>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const recognizeBtn = document.getElementById('recognizeBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const placeholder = document.getElementById('placeholder');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsList = document.getElementById('resultsList');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        let currentFile = null;
+        let currentMediaType = 'image';
+        
+        // File Input Handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+        
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        function handleFile(file) {
+            // Validate file type (images and videos)
+            const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp', 'image/webp'];
+            const allowedVideoTypes = ['video/mp4', 'video/avi', 'video/quicktime', 'video/x-matroska', 'video/webm'];
+            
+            const isImage = allowedImageTypes.includes(file.type);
+            const isVideo = allowedVideoTypes.includes(file.type);
+            
+            if (!isImage && !isVideo) {
+                showError('Invalid file type. Please upload an image or video file.');
+                return;
+            }
+            
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File too large. Maximum size is 10 MB.');
+                return;
+            }
+            
+            currentFile = file;
+            currentMediaType = isVideo ? 'video' : 'image';
+            hideError();
+            
+            // Display preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                if (isVideo) {
+                    imagePreview.innerHTML = `<video src="${e.target.result}" controls style="max-width: 100%; max-height: 400px;"></video>`;
+                } else {
+                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Uploaded image">`;
+                }
+            };
+            reader.readAsDataURL(file);
+            
+            // Enable recognize button
+            recognizeBtn.disabled = false;
+            
+            // Hide results
+            resultsSection.style.display = 'none';
+        }
+        
+        // Recognize Button Click
+        recognizeBtn.addEventListener('click', async () => {
+            if (!currentFile) return;
+            
+            // Show loading
+            loading.style.display = 'block';
+            resultsSection.style.display = 'none';
+            recognizeBtn.disabled = true;
+            hideError();
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('image', currentFile);
+            
+            try {
+                const response = await fetch('/recognize', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (data.success) {
+                    displayResults(data.predictions);
+                } else {
+                    showError(data.error || 'An error occurred during recognition.');
+                }
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                showError('Network error. Please try again.');
+                console.error('Error:', error);
+            }
+            
+            recognizeBtn.disabled = false;
+        });
+        
+        function displayResults(data) {
+            // Handle both direct predictions array and response object with predictions
+            const predictions = data.predictions || data;
+            const mediaType = data.media_type || 'image';
+            
+            resultsList.innerHTML = '';
+            
+            const colors = ['#00d4ff', '#7b2ff7', '#f107a3', '#ff6a00', '#00ff88'];
+            
+            // Add media type indicator for video
+            if (mediaType === 'video') {
+                const infoDiv = document.createElement('div');
+                infoDiv.style.cssText = 'background: rgba(123, 47, 247, 0.2); border: 1px solid #7b2ff7; border-radius: 10px; padding: 15px; margin-bottom: 20px; color: #7b2ff7;';
+                infoDiv.innerHTML = '<strong>🎬 Video Analysis</strong><br>Processed ' + (data.total_frames_processed || 'multiple') + ' frames';
+                resultsList.appendChild(infoDiv);
+            }
+            
+            predictions.forEach((pred, index) => {
+                const confidence = (pred.confidence || 0) * 100;
+                
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                
+                let extraInfo = '';
+                if (pred.frames_detected) {
+                    extraInfo = '<span style="font-size: 0.8rem; color: #7b2ff7;"> (' + pred.frames_detected + ' frames)</span>';
+                }
+                
+                card.innerHTML = '<span class="result-rank">#' + (pred.rank || index + 1) + '</span>' +
+                    '<span class="result-class">' + pred.class_name + extraInfo + '</span>' +
+                    '<span class="result-confidence">' + confidence.toFixed(1) + '%</span>' +
+                    '<div class="confidence-bar"><div class="confidence-fill" style="width: ' + confidence + '%; background: ' + (colors[index] || colors[0]) + ';"></div></div>';
+                
+                resultsList.appendChild(card);
+            });
+            
+            resultsSection.style.display = 'block';
+        }
+        
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+        
+        function hideError() {
+            errorMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
