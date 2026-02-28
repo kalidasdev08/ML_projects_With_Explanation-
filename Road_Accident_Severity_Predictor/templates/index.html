@@ -367,30 +367,33 @@
                 <h3>Probability Distribution</h3>
                 
                 {% if probabilities %}
-                {% set slight_pct = probabilities.get('Slight', 0) %}
-                {% set serious_pct = probabilities.get('Serious', 0) %}
-                {% set fatal_pct = probabilities.get('Fatal', 0) %}
                 <div class="probability-bar">
-                    <div class="probability-label">Slight Injury: {{ slight_pct }}%</div>
+                    <div class="probability-label">Slight Injury: {{ probabilities.get('Slight', 0) }}%</div>
                     <div class="bar-container">
-                        <div class="bar-fill bar-slight" style="width: {{ slight_pct }}%"></div>
+                        <div class="bar-fill bar-slight" data-pct="{{ probabilities.get('Slight', 0) }}"></div>
                     </div>
                 </div>
                 
                 <div class="probability-bar">
-                    <div class="probability-label">Serious Injury: {{ serious_pct }}%</div>
+                    <div class="probability-label">Serious Injury: {{ probabilities.get('Serious', 0) }}%</div>
                     <div class="bar-container">
-                        <div class="bar-fill bar-serious" style="width: {{ serious_pct }}%"></div>
+                        <div class="bar-fill bar-serious" data-pct="{{ probabilities.get('Serious', 0) }}"></div>
                     </div>
                 </div>
                 
                 <div class="probability-bar">
-                    <div class="probability-label">Fatal: {{ fatal_pct }}%</div>
+                    <div class="probability-label">Fatal: {{ probabilities.get('Fatal', 0) }}%</div>
                     <div class="bar-container">
-                        <div class="bar-fill bar-fatal" style="width: {{ fatal_pct }}%"></div>
+                        <div class="bar-fill bar-fatal" data-pct="{{ probabilities.get('Fatal', 0) }}"></div>
                     </div>
                 </div>
                 {% endif %}
+                
+                <script>
+                    document.querySelectorAll('.bar-fill[data-pct]').forEach(function(el) {
+                        el.style.width = el.getAttribute('data-pct') + '%';
+                    });
+                </script>
                 
                 {% if input_data %}
                 <div class="input-summary">
